@@ -123,6 +123,3 @@ class Snake:
             self._node_size - 10
         )
         pygame.draw.rect(program.SURF, colour, render_rect)
-
-    def size(self) -> int:
-        return self._grid_size
