@@ -78,19 +78,16 @@ class Snake:
             self.set_node_snake(new_pos)
 
     def spawn_apple(self) -> None:
-        while True:
-            empty_node_pos = []
-            for r, row in enumerate(self._grid):
-                for c, node in enumerate(row):
-                    if node == Node.EMPTY:
-                        empty_node_pos.append((r, c))
+        empty_node_pos = []
+        for r, row in enumerate(self._grid):
+            for c, node in enumerate(row):
+                if node == Node.EMPTY:
+                    empty_node_pos.append((r, c))
 
-            r, c = random.choice(empty_node_pos)
+        r, c = random.choice(empty_node_pos)
 
-            if self._grid[r][c] == Node.EMPTY:
-                self._grid[r][c] = Node.APPLE
-                self._apple_pos = (r, c)
-                break
+        self._grid[r][c] = Node.APPLE
+        self._apple_pos = (r, c)
 
     def set_node_empty(self, pos: (int, int)) -> None:
         self._grid[pos[0]][pos[1]] = Node.EMPTY
