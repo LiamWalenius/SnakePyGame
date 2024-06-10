@@ -1,5 +1,6 @@
 from collections import deque
 from enum import Enum
+from dataclasses import dataclass
 import pygame
 import program
 import colours
@@ -16,10 +17,15 @@ class Node(Enum):
     APPLE = 1
     SNAKE = 2
 
+@dataclass(frozen=True)
+class Position:
+    r: int
+    c: int
+
 class Snake:
     def __init__(self, size: int):
         self._grid_size = size
-        self._start_pos = (size // 2, size // 2)
+        self._start_pos = Position(size // 2, size // 2)
         self._node_size = program.WINDOW_SIZE // size
         self._snake = deque()
         self._grid = None
@@ -41,7 +47,7 @@ class Snake:
         self.spawn_apple()
 
     def set_direction(self, direction: Direction) -> None:
-        # Opposite directions have the same parites
+        # Opposite directions have the same parities
         if (direction.value % 2) == (self._prev_dir.value % 2):
             return
 
@@ -52,13 +58,13 @@ class Snake:
 
         match self._dir:
             case Direction.UP:
-                new_pos = (front[0] - 1, front[1])
+                new_pos = Position(front.r - 1, front.c)
             case Direction.DOWN:
-                new_pos = (front[0] + 1, front[1])
+                new_pos = Position(front.r + 1, front.c)
             case Direction.LEFT:
-                new_pos = (front[0], front[1] - 1)
+                new_pos = Position(front.r, front.c - 1)
             case _:  # Direction.RIGHT
-                new_pos = (front[0], front[1] + 1)
+                new_pos = Position(front.r, front.c + 1)
 
         self._prev_dir = self._dir
 
@@ -87,22 +93,22 @@ class Snake:
         r, c = random.choice(empty_node_pos)
 
         self._grid[r][c] = Node.APPLE
-        self._apple_pos = (r, c)
+        self._apple_pos = Position(r, c)
 
-    def set_node_empty(self, pos: (int, int)) -> None:
-        self._grid[pos[0]][pos[1]] = Node.EMPTY
+    def set_node_empty(self, pos: Position) -> None:
+        self._grid[pos.r][pos.c] = Node.EMPTY
 
-    def set_node_snake(self, pos: (int, int)) -> None:
-        self._grid[pos[0]][pos[1]] = Node.SNAKE
+    def set_node_snake(self, pos: Position) -> None:
+        self._grid[pos.r][pos.c] = Node.SNAKE
 
-    def node_is_apple(self, pos: (int, int)) -> bool:
-        return self._grid[pos[0]][pos[1]] == Node.APPLE
+    def node_is_apple(self, pos: Position) -> bool:
+        return self._grid[pos.r][pos.c] == Node.APPLE
 
-    def node_is_snake(self, pos: (int, int)) -> bool:
-        return self._grid[pos[0]][pos[1]] == Node.SNAKE
+    def node_is_snake(self, pos: Position) -> bool:
+        return self._grid[pos.r][pos.c] == Node.SNAKE
 
-    def pos_in_grid(self, pos: (int, int)) -> bool:
-        return (0 <= pos[0] < self._grid_size) and (0 <= pos[1] < self._grid_size)
+    def pos_in_grid(self, pos: Position) -> bool:
+        return (0 <= pos.r < self._grid_size) and (0 <= pos.c < self._grid_size)
 
     def draw(self) -> None:
         self.draw_apple()
@@ -115,10 +121,10 @@ class Snake:
     def draw_apple(self) -> None:
         self.draw_node(self._apple_pos, colours.RED)
 
-    def draw_node(self, pos: (int, int), colour: pygame.Color) -> None:
+    def draw_node(self, pos: Position, colour: pygame.Color) -> None:
         render_rect = pygame.Rect(
-            pos[1] * self._node_size + 5,
-            pos[0] * self._node_size + 5,
+            pos.c * self._node_size + 5,
+            pos.r * self._node_size + 5,
             self._node_size - 10,
             self._node_size - 10
         )
