@@ -88,15 +88,16 @@ class Snake:
         for r, row in enumerate(self._grid):
             for c, node in enumerate(row):
                 if node == Node.EMPTY:
-                    empty_node_pos.append((r, c))
+                    empty_node_pos.append(Position(r, c))
 
-        r, c = random.choice(empty_node_pos)
-
-        self._grid[r][c] = Node.APPLE
-        self._apple_pos = Position(r, c)
+        self._apple_pos = random.choice(empty_node_pos)
+        self.set_node_apple(self._apple_pos)
 
     def set_node_empty(self, pos: Position) -> None:
         self._grid[pos.r][pos.c] = Node.EMPTY
+
+    def set_node_apple(self, pos: Position) -> None:
+        self._grid[pos.r][pos.c] = Node.APPLE
 
     def set_node_snake(self, pos: Position) -> None:
         self._grid[pos.r][pos.c] = Node.SNAKE
@@ -110,22 +111,52 @@ class Snake:
     def pos_in_grid(self, pos: Position) -> bool:
         return (0 <= pos.r < self._grid_size) and (0 <= pos.c < self._grid_size)
 
+    def pos_to_window_coords(self, pos: Position) -> (int, int):
+        return (
+            pos.c * self._node_size,
+            pos.r * self._node_size
+        )
+
     def draw(self) -> None:
-        self.draw_apple()
         self.draw_snake()
+        self.draw_apple()
 
     def draw_snake(self) -> None:
-        for pos in self._snake:
-            self.draw_node(pos, colours.GREEN)
+        if len(self._snake) == 1:
+            return self.draw_node(self._snake[0], colours.GREEN)
+
+        padding = 5
+
+        for i in range(1, len(self._snake)):
+            x1, y1 = self.pos_to_window_coords(self._snake[i-1])
+            x2, y2 = self.pos_to_window_coords(self._snake[i])
+
+            top_left_x = min(x1, x2)
+            top_left_y = min(y1, y2)
+
+            bottom_right_x = max(x1, x2) + self._node_size
+            bottom_right_y = max(y1, y2) + self._node_size
+
+            render_rect = pygame.Rect(
+                top_left_x + padding,
+                top_left_y + padding,
+                bottom_right_x - top_left_x - padding*2,
+                bottom_right_y - top_left_y - padding*2
+            )
+            pygame.draw.rect(program.SURF, colours.GREEN, render_rect)
 
     def draw_apple(self) -> None:
         self.draw_node(self._apple_pos, colours.RED)
 
     def draw_node(self, pos: Position, colour: pygame.Color) -> None:
+        padding = 5
+
+        x, y = self.pos_to_window_coords(pos)
+
         render_rect = pygame.Rect(
-            pos.c * self._node_size + 5,
-            pos.r * self._node_size + 5,
-            self._node_size - 10,
-            self._node_size - 10
+            x + padding,
+            y + padding,
+            self._node_size - padding*2,
+            self._node_size - padding*2
         )
         pygame.draw.rect(program.SURF, colour, render_rect)
